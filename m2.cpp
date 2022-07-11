@@ -31,7 +31,8 @@ int myHashFunction(char*); //This function takes a string as a parameter and get
 WordNode* enterNewInfo(WordNode* newHead, char* str);//This function takes the head pointer as a array element and a string to save it to a new node and sort it.
 void searchInfo(WordNode* head, char*);//This function takes the head of the array as a parameter and a string and searches for the given string in the linked list.
 void freeList(WordNode* head);//This function takes the head as a parameter and frees the list. 
-
+WordNode* searchLinkedList(char * searchName, WordNode* linkedList, int* comparisonCount);
+void searchForNameTwice(char* searchName,WordNode* linkedList,WordNode* hashTable, int comparisonCount[2]);
 
 int main()
 {
@@ -42,6 +43,7 @@ int main()
 	struct WordNode* ptr = NULL;
 	int i = 0;
 	FILE* read_line = NULL;
+	int count[2] = { 0 };
 
 	while (1)
 	{
@@ -74,21 +76,60 @@ int main()
 		{
 			break;
 		}
-		value = myHashFunction(str2);
-		for (i = 0; i <= TABLE_SIZE; i++)
-		{
-			if (i == value)
-			{
-				searchInfo(&arr[i], str2); //searches for the string and prints the information.
-			}
-		}
+		searchForNameTwice(str2, ptr, arr, count);
+		
 	}
+	
+	
 	for (i = 0; i < TABLE_SIZE; i++)
 	{
 		freeList(&arr[i]);//frees all the element of an array and each nodes in a linked list.
 	}
 
 	return 0;
+}
+
+void searchForNameTwice(char* searchName,WordNode* linkedList,WordNode* hashTable, int comparisonCount[2])
+{
+	int value = 0;
+	int i = 0;
+	int count[2] = { 0 };
+	char s_name[LENGTH] = "";
+	strcpy(s_name, searchName);
+
+	value = myHashFunction(searchName);
+	for (i = 0; i <= TABLE_SIZE; i++)
+	{
+		if (i == value)
+		{
+			count[1] = i;
+			linkedList = searchLinkedList(s_name, &hashTable[i], comparisonCount);
+			printf("\n Bucket count:%d ", count[1]);
+		}
+		
+	}
+	comparisonCount[1] = comparisonCount[1] + count[1];
+	printf("\n Total Bucket count:%d ", comparisonCount[1]);
+}
+
+WordNode* searchLinkedList(char* searchName, WordNode* linkedList, int* comparisonCount)
+{
+	WordNode* ptr = linkedList;
+	ptr = ptr->next;
+	if (ptr == NULL)
+	{
+		printf("Not there!\n");
+	}
+	for (; ptr != NULL; ptr = ptr->next)
+	{
+		if (strcmp(ptr->value, searchName) == 0)
+		{
+			printf("%s\n", ptr->value);
+			printf("Success!\n");
+			break;
+		}
+	}
+	return ptr;
 }
 
 //This function creates a new node and sorts the node into the linked list.
