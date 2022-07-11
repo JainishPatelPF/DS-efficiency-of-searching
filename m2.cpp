@@ -69,7 +69,7 @@ int main()
 	}
 	while (1)
 	{
-		printf("Enter the String to search for: \n");
+		printf("\nEnter the String to search for: \n");
 		fgets(str2, LENGTH, stdin);
 		clearEndOfLine(str2);
 		if (checkString(str2) == 1)
@@ -102,33 +102,39 @@ void searchForNameTwice(char* searchName,WordNode* linkedList,WordNode* hashTabl
 	{
 		if (i == value)
 		{
-			count[1] = i;
+			count[1] = i+1;
 			linkedList = searchLinkedList(s_name, &hashTable[i], comparisonCount);
 			printf("\n Bucket count:%d ", count[1]);
 		}
 		
 	}
 	comparisonCount[1] = comparisonCount[1] + count[1];
-	printf("\n Total Bucket count:%d ", comparisonCount[1]);
+	printf("\n Total Bucket count:%d && Total Linked List Count: %d", comparisonCount[1], comparisonCount[0]);
 }
 
 WordNode* searchLinkedList(char* searchName, WordNode* linkedList, int* comparisonCount)
 {
 	WordNode* ptr = linkedList;
+	int count[2] = { 0 };
+	int i = 0;
+
 	ptr = ptr->next;
-	if (ptr == NULL)
+	
+	for (i = 0; ptr != NULL; ptr = ptr->next)
 	{
-		printf("Not there!\n");
-	}
-	for (; ptr != NULL; ptr = ptr->next)
-	{
+		count[0] = i + 1;
 		if (strcmp(ptr->value, searchName) == 0)
 		{
-			printf("%s\n", ptr->value);
-			printf("Success!\n");
+			printf("\n%s was found in the linked list in %d comparisons\n", searchName, count[0]);
 			break;
 		}
+		i++;
 	}
+	if (ptr->value == NULL)
+	{
+		printf("\n%s was NOT found in the linked list in %d comparisons\n", searchName, count[0]);
+	}
+	comparisonCount[0] = comparisonCount[0] + count[0];
 	return ptr;
 }
 
