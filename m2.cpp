@@ -1,10 +1,10 @@
 /*
-* FILE : f3.cpp
-* PROJECT : SENG1050 - Focused Assignment 3
+* FILE : m2.cpp
+* PROJECT : SENG1050 - Major 2
 * PROGRAMMER : Jainish Prakash Patel
-* FIRST VERSION : 23-06-2022
+* FIRST VERSION : 08-07-2022
 * DESCRIPTION :
-* Create a program that stores words in a Hash Table and then searches for the words.
+* Compare the efficiency of searching a sorted linked list and a hash table.
 */
 #include<stdio.h>
 #include<conio.h>
@@ -15,7 +15,7 @@
 #pragma warning(disable:6001)
 
 #define LENGTH 21
-#define TABLE_SIZE 11
+#define TABLE_SIZE 127
 
 
 struct WordNode
@@ -41,24 +41,29 @@ int main()
 	struct WordNode arr[TABLE_SIZE] = { NULL };
 	struct WordNode* ptr = NULL;
 	int i = 0;
+	FILE* read_line = NULL;
 
 	while (1)
 	{
-		printf("Enter the String no Less than 20 Characters Long: \n");
-		fgets(str1, LENGTH, stdin);
-		clearEndOfLine(str1);//clears the end of the line.
-		if (checkString(str1) == 1)//checks the string for a '.'
+		read_line = fopen("names.txt", "r+");
+		if (read_line == NULL)
 		{
-			break;
+			return 1;
 		}
-		value = myHashFunction(str1);//returns a index value for an array.
-		for (i = 0; i <= TABLE_SIZE; i++)
+		while (fgets(str1, LENGTH, read_line))
 		{
-			if (i == value)
+			clearEndOfLine(str1);//clears the end of the line.
+			value = myHashFunction(str1);//returns a index value for an array.
+			for (i = 0; i <= TABLE_SIZE; i++)
 			{
-				enterNewInfo(&arr[i], str1);//creates a new node and sorts it in a linked list.
+				if (i == value)
+				{
+					enterNewInfo(&arr[i], str1);//creates a new node and sorts it in a linked list.
+				}
 			}
 		}
+		fclose(read_line);
+		break;
 	}
 	while (1)
 	{
