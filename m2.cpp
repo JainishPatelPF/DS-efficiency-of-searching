@@ -29,7 +29,6 @@ void clearEndOfLine(char* buff); //This function takes the string as a parameter
 unsigned long djb2(char* str); //This function returns the hash value and a string is taken as a parameter.
 int myHashFunction(char*); //This function takes a string as a parameter and gets a index value for the hash table to store the string.
 WordNode* enterNewInfo(WordNode* newHead, char* str);//This function takes the head pointer as a array element and a string to save it to a new node and sort it.
-void searchInfo(WordNode* head, char*);//This function takes the head of the array as a parameter and a string and searches for the given string in the linked list.
 void freeList(WordNode* head);//This function takes the head as a parameter and frees the list. 
 WordNode* searchLinkedList(char * searchName, WordNode* linkedList, int* comparisonCount);
 void searchForNameTwice(char* searchName,WordNode* linkedList,WordNode* hashTable, int comparisonCount[2]);
@@ -44,6 +43,7 @@ int main()
 	int i = 0;
 	FILE* read_line = NULL;
 	int count[2] = { 0 };
+	int search_count = 0;
 
 	while (1)
 	{
@@ -55,6 +55,7 @@ int main()
 		while (fgets(str1, LENGTH, read_line))
 		{
 			clearEndOfLine(str1);//clears the end of the line.
+			ptr = enterNewInfo(ptr, str1);
 			value = myHashFunction(str1);//returns a index value for an array.
 			for (i = 0; i <= TABLE_SIZE; i++)
 			{
@@ -67,9 +68,12 @@ int main()
 		fclose(read_line);
 		break;
 	}
+	i = 0;
+	printf("Search for Names. Press '.' to exit.\n");
 	while (1)
 	{
-		printf("\nEnter the String to search for: \n");
+		search_count = i;
+		
 		fgets(str2, LENGTH, stdin);
 		clearEndOfLine(str2);
 		if (checkString(str2) == 1)
@@ -77,9 +81,12 @@ int main()
 			break;
 		}
 		searchForNameTwice(str2, ptr, arr, count);
-		
+		i++;
 	}
 	
+	printf("\tTotal Linked Lists Count: %d\n", count[0]);
+	printf("\tTotal Hash Table Buckets Count:%d\n", count[1]);
+	printf("\tTotal Searches Count:%d\n", search_count);
 	
 	for (i = 0; i < TABLE_SIZE; i++)
 	{
@@ -96,45 +103,60 @@ void searchForNameTwice(char* searchName,WordNode* linkedList,WordNode* hashTabl
 	int count[2] = { 0 };
 	char s_name[LENGTH] = "";
 	strcpy(s_name, searchName);
+	WordNode* Return_node = NULL;
+	WordNode* Return_Bucket_node = NULL;
 
 	value = myHashFunction(searchName);
 	for (i = 0; i <= TABLE_SIZE; i++)
 	{
 		if (i == value)
-		{
-			count[1] = i+1;
-			linkedList = searchLinkedList(s_name, &hashTable[i], comparisonCount);
-			printf("\n Bucket count:%d ", count[1]);
+		{	
+			Return_Bucket_node = searchLinkedList(s_name, &hashTable[i], &count[1]);
+			count[1] = i + 1;
+			if (Return_Bucket_node != NULL)
+			{
+				printf("\t%s was found in the hash table bucket in %d comparisons.\n", searchName, count[1]);
+			}
+			else
+			{
+				printf("\t%s was NOT found in the hash table bucket in %d comparisons.\n", searchName, count[1]);
+			}
 		}
-		
 	}
 	comparisonCount[1] = comparisonCount[1] + count[1];
-	printf("\n Total Bucket count:%d && Total Linked List Count: %d", comparisonCount[1], comparisonCount[0]);
+	Return_node = searchLinkedList(s_name, linkedList, &count[0]);
+	if (Return_node != NULL)
+	{
+		printf("\t%s was found in the linked list in %d comparisons.\n", searchName, count[0]);
+	}
+	else
+	{
+		printf("\t%s was NOT found in the linked list in %d comparisons.\n", searchName, count[0]);
+	}
+	comparisonCount[0] = comparisonCount[0] + count[0];
 }
 
 WordNode* searchLinkedList(char* searchName, WordNode* linkedList, int* comparisonCount)
 {
 	WordNode* ptr = linkedList;
-	int count[2] = { 0 };
 	int i = 0;
 
 	ptr = ptr->next;
 	
 	for (i = 0; ptr != NULL; ptr = ptr->next)
 	{
-		count[0] = i + 1;
+		comparisonCount[0] = i + 1;
 		if (strcmp(ptr->value, searchName) == 0)
 		{
-			printf("\n%s was found in the linked list in %d comparisons\n", searchName, count[0]);
 			break;
 		}
 		i++;
 	}
 	if (ptr->value == NULL)
 	{
-		printf("\n%s was NOT found in the linked list in %d comparisons\n", searchName, count[0]);
+		ptr = NULL;
 	}
-	comparisonCount[0] = comparisonCount[0] + count[0];
+
 	return ptr;
 }
 
@@ -156,18 +178,15 @@ WordNode* enterNewInfo(WordNode* newHead, char* str)
 
 	if (newHead == NULL)
 	{
-
 		newHead = newBlock;
 	}
 	else if (strcmp(newHead->value, newBlock->value) >= 0)
 	{
 		newBlock->next = newHead;
-
 		newHead = newBlock;
 	}
 	else
 	{
-
 		prev = newHead;
 		ptr = newHead->next;
 
@@ -180,37 +199,12 @@ WordNode* enterNewInfo(WordNode* newHead, char* str)
 			prev = ptr;
 			ptr = ptr->next;
 		}
-
-
 		newBlock->next = ptr;
 		prev->next = newBlock;
-
 	}
-
 	return newHead;
-
 }
 
-//This function is used to search the given string into a linked list.
-void searchInfo(WordNode* head, char* data)
-{
-	WordNode* ptr = head;
-	ptr = ptr->next;
-	if (ptr == NULL)
-	{
-		printf("Not there!\n");
-	}
-	for (; ptr != NULL; ptr = ptr->next)
-	{
-		if (strcmp(ptr->value, data) == 0)
-		{
-			printf("%s\n", ptr->value);
-			printf("Success!\n");
-			break;
-		}
-	}
-
-}
 //This function is used to calculate the index value of the given hash value by djb2() using division method.
 int myHashFunction(char* element)
 {
@@ -240,7 +234,7 @@ unsigned long djb2(char* str)
 //This Function is used to check the string whether it has a '.' in the string.
 int checkString(char str[])
 {
-	if (strchr(str, '.'))
+	if (strcmp(str, ".") == 0)
 	{
 		return 1;
 	}
