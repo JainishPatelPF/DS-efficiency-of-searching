@@ -30,8 +30,8 @@ unsigned long djb2(char* str); //This function returns the hash value and a stri
 int myHashFunction(char*); //This function takes a string as a parameter and gets a index value for the hash table to store the string.
 WordNode* enterNewInfo(WordNode* newHead, char* str);//This function takes the head pointer as a array element and a string to save it to a new node and sort it.
 void freeList(WordNode* head);//This function takes the head as a parameter and frees the list. 
-WordNode* searchLinkedList(char * searchName, WordNode* linkedList, int* comparisonCount);
-void searchForNameTwice(char* searchName,WordNode* linkedList,WordNode* hashTable, int comparisonCount[2]);
+WordNode* searchLinkedList(char * searchName, WordNode* linkedList, int* comparisonCount);//This function searches through the linked list for a string.
+void searchForNameTwice(char* searchName,WordNode* linkedList,WordNode* hashTable, int comparisonCount[2]);//this function is used to search the string in the hash table as well as the sorted linked list.
 
 int main()
 {
@@ -47,12 +47,12 @@ int main()
 
 	while (1)
 	{
-		read_line = fopen("names.txt", "r+");
+		read_line = fopen("names.txt", "r+"); //opens the file
 		if (read_line == NULL)
 		{
 			return 1;
 		}
-		while (fgets(str1, LENGTH, read_line))
+		while (fgets(str1, LENGTH, read_line)) //gets the string line by line
 		{
 			clearEndOfLine(str1);//clears the end of the line.
 			ptr = enterNewInfo(ptr, str1);
@@ -65,7 +65,10 @@ int main()
 				}
 			}
 		}
-		fclose(read_line);
+		if (fclose(read_line) != 0) //closes the file
+		{
+			printf("\nError reading file.\n");
+		}
 		break;
 	}
 	i = 0;
@@ -74,13 +77,13 @@ int main()
 	{
 		search_count = i;
 		
-		fgets(str2, LENGTH, stdin);
-		clearEndOfLine(str2);
-		if (checkString(str2) == 1)
+		fgets(str2, LENGTH, stdin); //gets the value from the user.
+		clearEndOfLine(str2); //clears end of the line.
+		if (checkString(str2) == 1) // checks the string if there is a '.'.
 		{
 			break;
 		}
-		searchForNameTwice(str2, ptr, arr, count);
+		searchForNameTwice(str2, ptr, arr, count); //this function call is used to search for the hash buckets and number of linked lists searched to the desired string.
 		i++;
 	}
 	
@@ -96,6 +99,11 @@ int main()
 	return 0;
 }
 
+/* FUNCTION		: searchForNameTwice()
+* DESCRIPTION   : this function takes 4 parameters and it is used to search the hash table as well as the very long sorted linked list.
+* PARAMETERS    : char* searchName, WordNode* linkedList, WordNode* hashTable, int comparisonCount[2]
+* RETURNS		: nothing
+*/
 void searchForNameTwice(char* searchName,WordNode* linkedList,WordNode* hashTable, int comparisonCount[2])
 {
 	int value = 0;
@@ -106,12 +114,12 @@ void searchForNameTwice(char* searchName,WordNode* linkedList,WordNode* hashTabl
 	WordNode* Return_node = NULL;
 	WordNode* Return_Bucket_node = NULL;
 
-	value = myHashFunction(searchName);
+	value = myHashFunction(searchName); //calculates the index value of the hash table.
 	for (i = 0; i <= TABLE_SIZE; i++)
 	{
 		if (i == value)
 		{	
-			Return_Bucket_node = searchLinkedList(s_name, &hashTable[i], &count[1]);
+			Return_Bucket_node = searchLinkedList(s_name, &hashTable[i], &count[1]); //search for hash table bucket.
 			count[1] = i + 1;
 			if (Return_Bucket_node != NULL)
 			{
@@ -124,7 +132,7 @@ void searchForNameTwice(char* searchName,WordNode* linkedList,WordNode* hashTabl
 		}
 	}
 	comparisonCount[1] = comparisonCount[1] + count[1];
-	Return_node = searchLinkedList(s_name, linkedList, &count[0]);
+	Return_node = searchLinkedList(s_name, linkedList, &count[0]); //search for linked list count.
 	if (Return_node != NULL)
 	{
 		printf("\t%s was found in the linked list in %d comparisons.\n", searchName, count[0]);
@@ -136,6 +144,11 @@ void searchForNameTwice(char* searchName,WordNode* linkedList,WordNode* hashTabl
 	comparisonCount[0] = comparisonCount[0] + count[0];
 }
 
+/* FUNCTION		: searchLinkedList()
+* DESCRIPTION   : this function takes 3 parameters and it is used to search the sorted linked list and sets the node to null if the match is not found.
+* PARAMETERS    : char* searchName, WordNode* linkedList, int* comparisonCount
+* RETURNS		: WordNode pointer
+*/
 WordNode* searchLinkedList(char* searchName, WordNode* linkedList, int* comparisonCount)
 {
 	WordNode* ptr = linkedList;
@@ -146,7 +159,7 @@ WordNode* searchLinkedList(char* searchName, WordNode* linkedList, int* comparis
 	for (i = 0; ptr != NULL; ptr = ptr->next)
 	{
 		comparisonCount[0] = i + 1;
-		if (strcmp(ptr->value, searchName) == 0)
+		if (strcmp(ptr->value, searchName) == 0) //compares the string with the search variable
 		{
 			break;
 		}
@@ -160,7 +173,12 @@ WordNode* searchLinkedList(char* searchName, WordNode* linkedList, int* comparis
 	return ptr;
 }
 
-//This function creates a new node and sorts the node into the linked list.
+/* FUNCTION		: enterNewInfo()
+* DESCRIPTION   : This function creates a new node and sorts the node into the linked list.
+* PARAMETERS    : WordNode* newHead, char* str
+* RETURNS		: WordNode pointer
+*/
+
 WordNode* enterNewInfo(WordNode* newHead, char* str)
 {
 	WordNode* newBlock = NULL;
@@ -205,7 +223,11 @@ WordNode* enterNewInfo(WordNode* newHead, char* str)
 	return newHead;
 }
 
-//This function is used to calculate the index value of the given hash value by djb2() using division method.
+/* FUNCTION		: myHashFunction()
+* DESCRIPTION   : This function is used to calculate the index value of the given hash value by djb2() using division method.
+* PARAMETERS    : char* element
+* RETURNS		: int
+*/
 int myHashFunction(char* element)
 {
 	unsigned int hash_Value = 0;
@@ -231,7 +253,12 @@ unsigned long djb2(char* str)
 	return hash;
 }
 
-//This Function is used to check the string whether it has a '.' in the string.
+/* FUNCTION		: checkString()
+* DESCRIPTION   : This Function is used to check the string whether it has a '.' in the string.
+* PARAMETERS    : char str[]
+* RETURNS		: int
+*/
+
 int checkString(char str[])
 {
 	if (strcmp(str, ".") == 0)
@@ -244,7 +271,11 @@ int checkString(char str[])
 	}
 }
 
-//This function clears the end of the line of a string taken by fgets.
+/* FUNCTION		: clearEndOfLine()
+* DESCRIPTION   : This function clears the end of the line of a string taken by fgets.
+* PARAMETERS    : char* buff
+* RETURNS		: nothing
+*/
 void clearEndOfLine(char* buff)
 {
 	char* temp = strchr(buff, '\n');
@@ -254,7 +285,12 @@ void clearEndOfLine(char* buff)
 	}
 }
 
-//This function frees the dynamically allocated memory.
+/* FUNCTION		: clearEndOfLine()
+* DESCRIPTION   : This function frees the dynamically allocated memory.
+* PARAMETERS    : WordNode* head
+* RETURNS		: nothing
+*/
+
 void freeList(WordNode* head)
 {
 	WordNode* temp = NULL;
